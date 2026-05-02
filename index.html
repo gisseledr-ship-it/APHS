@@ -209,13 +209,21 @@ function goEntry(){clearTimer();showScreen('entry')}
 function goCompany(){showScreen('company');renderCompany()}
 function resetTest(){clearTimer();document.getElementById('entry-name').value='';document.getElementById('entry-product').value='';showScreen('entry')}
 function startTest(){
-  const name=document.getElementById('entry-name').value.trim();
-  const product=document.getElementById('entry-product').value.trim();
+  const nameEl=document.getElementById('entry-name');
+  const productEl=document.getElementById('entry-product');
+  const name=(nameEl?nameEl.value:'').trim();
+  const product=(productEl?productEl.value:'').trim();
   const errEl=document.getElementById('entry-error');
-  if(!name||!product){errEl.textContent='Preencha seu nome e o que você vende para continuar.';errEl.style.display='block';return}
-  errEl.style.display='none';
-  G={name,product,sessionId:Date.now().toString(36)+Math.random().toString(36).slice(2,6),roundOrder:buildRoundOrder(),rounds:[],current:0,timer:null,tLeft:0,timerTotal:0,inputLocked:false,startTs:0,responses:[],argHistory:[],interest:50,resistance:50,trust:30,rawScores:{p:[],a:[],c:[],s:[]}};
-  G.rounds=G.roundOrder.map(idx=>{const tpl=ROUND_TEMPLATES[idx];return{...tpl,msg:pickVariant(tpl)}});
+  if(!name||!product){
+    if(errEl){errEl.textContent='Preencha seu nome e o que você vende para continuar.';errEl.style.display='block';}
+    return;
+  }
+  if(errEl)errEl.style.display='none';
+  G={name:name,product:product,sessionId:Date.now().toString(36)+Math.random().toString(36).slice(2,6),roundOrder:buildRoundOrder(),rounds:[],current:0,timer:null,tLeft:0,timerTotal:0,inputLocked:false,startTs:0,responses:[],argHistory:[],interest:50,resistance:50,trust:30,rawScores:{p:[],a:[],c:[],s:[]}};
+  G.rounds=G.roundOrder.map(function(idx){
+    var tpl=ROUND_TEMPLATES[idx];
+    return{type:tpl.type,tag:tpl.tag,tagCls:tpl.tagCls,time:tpl.time,variants:tpl.variants,msg:pickVariant(tpl)};
+  });
   showScreen('chat');
   document.getElementById('chat-messages').innerHTML='';
   updateMeters();updateDots();
